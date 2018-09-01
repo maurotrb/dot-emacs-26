@@ -1,0 +1,898 @@
+# -*- mode: org -*-
+#+TITLE: Mauro Taraborelli's Emacs configuration
+#+OPTIONS: toc:4 h:4
+
+* Configuration
+** Packages
+#+begin_src emacs-lisp
+  (setq el-get-dir (concat user-emacs-directory (file-name-as-directory "el-get")))
+
+  (add-to-list 'load-path (expand-file-name "el-get/el-get" user-emacs-directory))
+
+  (unless (require 'el-get nil 'noerror)
+  (with-current-buffer
+      (url-retrieve-synchronously
+       "https://raw.githubusercontent.com/dimitri/el-get/master/el-get-install.el")
+    (goto-char (point-max))
+    (eval-print-last-sexp)))
+
+  (add-to-list 'el-get-recipe-path (expand-file-name "el-get-user/recipes" user-emacs-directory))
+
+  (el-get-bundle solarized-emacs)
+  (el-get-bundle magit)
+  (el-get-bundle smex)
+  (el-get-bundle haskell-mode)
+  (el-get-bundle ledger-mode)
+  (el-get-bundle markdown-mode)
+  (el-get-bundle dired+)
+#+end_src
+
+** General
+*** Basic settings
+
+**** Language environment
+The language environment controls which coding systems to recognize when reading
+text. This applies to files, incoming mail, and any other text you read into
+Emacs. It may also specify the default coding system to use when you create a file.
+Each language environment also specifies a default input method.
+#+begin_src emacs-lisp
+(set-language-environment "UTF-8")
+#+end_src
+
+**** Ido (Interactively Do)
+The "Ido" package can let you switch between buffers and visit files and directories
+with a minimum of keystrokes.
+#+begin_src emacs-lisp
+(ido-mode t)
+#+end_src
+
+Use ido for all buffer and file selections in Emacs.
+#+begin_src emacs-lisp
+(setq ido-everywhere t)
+#+end_src
+
+Flexible matching means that if the entered string does not match any item, any
+item containing the entered characters in the given sequence will match.
+#+begin_src emacs-lisp
+(setq ido-enable-flex-matching t)
+#+end_src
+
+Find File At Point, also known generally as "ffap", is an intelligent system for
+opening files, and URLs.
+#+begin_src emacs-lisp
+(setq ido-use-filename-at-point 'guess)
+#+end_src
+
+Always create new buffers unconditionally if no buffer matches substring.
+#+begin_src emacs-lisp
+(setq ido-create-new-buffer 'always)
+#+end_src
+
+Customize the order in which files are sorted when Ido displays them in the
+minibuffer.
+#+begin_src emacs-lisp
+(setq ido-file-extensions-order '(".org" ".txt" ".el"))
+#+end_src
+
+**** Smex
+Smex is a M-x enhancement for Emacs. Built on top of Ido, it provides a convenient
+interface to your recently and most frequently used commands. And to all the other
+commands, too.
+
+Run Smex. The commands are displayed in an Ido completion buffer, ordered by
+relevance. The 7 most recently executed commands come first, the rest are sorted
+by frequency of use, command length and in alphabetical order.
+#+begin_src emacs-lisp
+(global-set-key (kbd "M-x") 'smex)
+#+end_src
+
+Run Smex, limited to commands that are relevant to the active major mode.
+#+begin_src emacs-lisp
+(global-set-key (kbd "M-X") 'smex-major-mode-commands)
+#+end_src
+
+Rebind old M-x.
+#+begin_src emacs-lisp
+;; This is your old M-x.
+(global-set-key (kbd "C-c C-c M-x") 'execute-extended-command)
+#+end_src
+
+**** Whitespace
+This package is a minor mode to visualize blanks (TAB, (HARD) SPACE and NEWLINE).
+#+begin_src emacs-lisp
+(require 'whitespace)
+#+end_src
+
+Set styles:
++ trailing spaces
++ tabs
++ lines that goes beyond 80 columns
++ empty line at the beginning or at the end of the buffer
+#+begin_src emacs-lisp
+(setq whitespace-style '(face trailing tabs lines-tail empty))
+(setq whitespace-line-column 80)
+#+end_src
+
+Turn on Whitespace mode on all buffers.
+#+begin_src emacs-lisp
+(global-whitespace-mode t)
+#+end_src
+
+**** Truncate Lines
+Turn off wrapping for a single buffer using M-x toggle-truncate-lines.
+Set as a custom key bindings.
+#+begin_src emacs-lisp
+(global-set-key (kbd "<f7>") 'toggle-truncate-lines)
+#+end_src
+
+**** Backup
+Organize backup ...
+
+... with copy and not symlink
+#+begin_src emacs-lisp
+(setq backup-by-copying t)
+#+end_src
+
+... in a specific directory
+#+begin_src emacs-lisp
+(setq backup-directory-alist '(("." . "~/.emacs24.saves")))
+#+end_src
+
+... deleting excess backup versions
+#+begin_src emacs-lisp
+(setq delete-old-versions t)
+#+end_src
+
+... keeping the oldest two versions
+#+begin_src emacs-lisp
+(setq kept-old-versions 2)
+#+end_src
+
+... keeping the newest six versions
+#+begin_src emacs-lisp
+(setq kept-new-versions 6)
+#+end_src
+
+... using version numbers for backups
+#+begin_src emacs-lisp
+(setq version-control t)
+#+end_src
+
+**** Easy PG
+EasyPG is an all-in-one GnuPG interface for Emacs. It has two aspects:
+convenient tools which allow to use GnuPG from Emacs (EasyPG Assistant),
+and a fully functional interface library to GnuPG (EasyPG Library).
+
+Setup for transparent, automatic encryption and decryption:
+#+begin_src emacs-lisp
+(epa-file-enable)
+#+end_src
+
+**** Disabling prompts
+Replace “yes or no” prompt with “y or n”.
+#+begin_src emacs-lisp
+(fset 'yes-or-no-p 'y-or-n-p)
+#+end_src
+
+No confirmation if a file or buffer does not exist when you use C-x C-f or C-x b.
+#+begin_src emacs-lisp
+(setq confirm-nonexistent-file-or-buffer nil)
+#+end_src
+
+*** User Interface
+
+Input Mono as default font.
+#+begin_src emacs-lisp
+(set-default-font "Input Mono Compressed Light-9")
+#+end_src
+
+No startup messages.
+#+begin_src emacs-lisp
+(setq inhibit-startup-message t
+      inhibit-startup-echo-area-message t)
+#+end_src
+
+No toolbar and scroll bar.
+#+begin_src emacs-lisp
+(tool-bar-mode -1)
+(toggle-scroll-bar -1)
+#+end_src
+
+Display the current column number.
+#+begin_src emacs-lisp
+(column-number-mode t)
+#+end_src
+
+Toggle Font Lock mode in all buffers.
+#+begin_src emacs-lisp
+(global-font-lock-mode 1)
+#+end_src
+
+Change theme to solarized dark.
+#+begin_src emacs-lisp
+(setq solarized-scale-org-headlines nil)
+(setq solarized-use-variable-pitch nil)
+(if window-system
+  (load-theme 'solarized-dark t))
+#+end_src
+
+** Org
+
+*** Basic settings
+The four Org commands org-store-link, org-capture, org-agenda, and org-iswitchb
+should be accessible through global keys (i.e., anywhere in Emacs, not just in Org buffers).
+#+begin_src emacs-lisp
+(global-set-key "\C-cl" 'org-store-link)
+(global-set-key "\C-cc" 'org-capture)
+(global-set-key "\C-ca" 'org-agenda)
+(global-set-key "\C-cb" 'org-iswitchb)
+#+end_src
+
+A cleaner outline view can be achieved dynamically at display time using org-indent-mode.
+In this minor mode, all lines are prefixed for display with the necessary amount of space.
+Also headlines are prefixed with additional stars, so that the amount of indentation
+shifts by two spaces per level. All headline stars but the last one are made invisible
+using the org-hide faces. You can turn on org-indent-mode for all files by customizing
+the variable org-startup-indented.
+#+begin_src emacs-lisp
+(setq org-startup-indented t)
+#+end_src
+
+When Emacs first visits an Org file, the global state is set to OVERVIEW, i.e.,
+only the top level headlines are visible.
+#+begin_src emacs-lisp
+(setq org-startup-folded t)
+#+end_src
+
+Sometimes you may inadvertently edit an invisible part of the buffer and be confused
+on what has been edited and how to undo the mistake. Setting org-catch-invisible-edits
+to smart make point visible, and do insertion/deletion if it is adjacent to visible
+text and the change feels predictable. Never delete a previously invisible character
+or add in the middle or right after an invisible region. Basically, this allows
+insertion and backward-delete right before ellipses.
+#+begin_src emacs-lisp
+(setq org-catch-invisible-edits 'smart)
+#+end_src
+
+Set custom key bindings.
+#+begin_src emacs-lisp
+(global-set-key (kbd "<f8>") 'org-cycle-agenda-files)
+(global-set-key (kbd "<f12>") 'org-agenda)
+#+end_src
+
+*** TODOs
+Use TODO keywords as workflow states.
+#+begin_src emacs-lisp
+(setq org-todo-keywords
+      '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!/!)")
+        (sequence "WAIT(w@/!)" "HOLD(h@/!)" "|" "CANC(c@/!)")))
+#+end_src
+
+Log state change into drawer.
+#+begin_src emacs-lisp
+(setq org-log-done 'time)
+(setq org-log-into-drawer t)
+#+end_src
+
+Block entries from changing state to DONE while they have children that are not DONE.
+Furthermore, if an entry has a property ORDERED, each of its children will be blocked
+until all earlier siblings are marked DONE.
+#+begin_src emacs-lisp
+(setq org-enforce-todo-dependencies t)
+#+end_src
+
+TODO entries that cannot be closed because of previous dependencies will be shown
+in a dimmed font or even made invisible in agenda views.
+#+begin_src emacs-lisp
+(setq org-agenda-dim-blocked-tasks t)
+#+end_src
+
+An entry that has unchecked checkboxes will be blocked from switching to DONE.
+#+begin_src emacs-lisp
+(setq org-enforce-todo-checkbox-dependencies t)
+#+end_src
+
+Highlight TODO keywords with special faces. From Solarized theme.
+#+begin_src emacs-lisp
+  (setq org-todo-keyword-faces
+        (quote (("TODO" :foreground "#dc322f" :weight bold)
+                ("NEXT" :foreground "#b58900" :weight bold)
+                ("DONE" :foreground "#859900" :weight bold)
+                ("WAIT" :foreground "#cb4b16" :weight bold)
+                ("HOLD" :foreground "#268bd2" :weight bold)
+                ("CANC" :foreground "#859900" :weight bold))))
+#+end_src
+
+*** Habits
+Org has the ability to track the consistency of a special category of TODOs, called “habits”.
+#+begin_src emacs-lisp
+(add-to-list 'org-modules 'org-habit t)
+(require 'org-habit)
+#+end_src
+
+Set column where habit graph starts.
+#+begin_src emacs-lisp
+(setq org-habit-graph-column 55)
+#+end_src
+
+*** Drill: flashcard and spaced repetition
+Org-Drill is an extension for Org mode. Org-Drill uses a spaced repetition algorithm
+to conduct interactive "drill sessions", using org files as sources of facts to be memorised.
+Each topic is treated as a "flash card". The material to be remembered is presented
+to the student in random order. The student rates his or her recall of each item,
+and this information is used to schedule the item for later revision.
+#+begin_src emacs-lisp
+(add-to-list 'org-modules 'org-drill t)
+(require 'org-drill)
+#+end_src
+
+The intervals generated by the SM2 and SM5 (default) algorithms are pretty deterministic.
+If you tend to add items in large, infrequent batches, the lack of variation in interval
+scheduling can lead to the problem of "lumpiness" – one day a large batch of items
+are due for review, the next there is almost nothing, a few days later another big pile
+of items is due. This problem can be ameliorated by adding some random "noise" to
+the interval scheduling algorithm.
+#+begin_src emacs-lisp
+(setq org-drill-add-random-noise-to-intervals-p t)
+#+end_src
+
+*** Tags
+An excellent way to implement labels and contexts for cross-correlating information
+is to assign tags to headlines. Org mode has extensive support for tags.
+Every headline can contain a list of tags; they occur at the end of the headline.
+Tags are normal words containing letters, numbers, ‘_’, and ‘@’. Tags must be preceded
+and followed by a single colon, e.g., ‘:work:’. Several tags can be specified, as
+in ‘:work:urgent:’. Tags will by default be in bold face with the same color as the headline.
+
+Org supports tag insertion based on a list of tags. By default this list is constructe
+dynamically, containing all tags currently used in the buffer. You may also globally
+specify a hard list of tags with the variable org-tag-alist.
+#+begin_src emacs-lisp
+  (setq org-tag-alist '((:startgroup . nil)
+                        ("@errand" . ?e)
+                        ("@office" . ?o)
+                        ("@home" . ?h)
+                        ("@hometown" . ?w)
+                        ("@commute" . ?m)
+                        (:endgroup . nil)
+                        ("phone" . ?p)
+                        ("computer" . ?c)
+                        ("online" . ?l)))
+#+end_src
+
+Changing a TODO state triggers tag changes.
+#+begin_src emacs-lisp
+  (setq org-todo-state-tags-triggers
+        (quote (("CANC" ("CANC" . t))
+                ("WAIT" ("WAIT" . t))
+                ("HOLD" ("HOLD" . t))
+                (done ("WAIT") ("HOLD"))
+                ("TODO" ("WAIT") ("CANC") ("HOLD"))
+                ("NEXT" ("WAIT") ("CANC") ("HOLD"))
+                ("DONE" ("WAIT") ("CANC") ("HOLD")))))
+#+end_src
+
+*** Capture
+Capture lets you quickly store notes with little interruption of your work flow.
+
+Set a default target file for notes.
+#+begin_src emacs-lisp
+(setq org-default-notes-file (concat org-directory "/refile.org"))
+#+end_src
+
+Templates for different types of capture items.
+#+begin_src emacs-lisp
+  (setq org-capture-templates '(("t" "Todo" entry (file org-default-notes-file)
+                                 "* TODO %?\n%U\n%a\n  %i" :clock-in t :clock-resume t)
+                                ("n" "Note" entry (file org-default-notes-file)
+                                 "* %? :NOTE:\n%U\n%a\n  %i" :clock-in t :clock-resume t)))
+#+end_src
+
+*** Archiving
+When a project represented by a (sub)tree is finished, you may want to move the tree
+out of the way and to stop it from contributing to the agenda. Archiving is important
+to keep your working files compact and global searches like the construction of
+agenda views fast.
+
+Tasks are archived under the heading * Archived Tasks in the archive file.
+#+begin_src emacs-lisp
+(setq org-archive-location "%s_archive::* Archived Tasks")
+#+end_src
+
+*** Agenda
+Due to the way Org works, TODO items, time-stamped items, and tagged headlines
+can be scattered throughout a file or even a number of files. To get an overview
+of open action items, or of events that are important for a particular date,
+this information must be collected, sorted and displayed in an organized way.
+The extracted information is displayed in a special agenda buffer. This buffer
+is read-only, but provides commands to visit the corresponding locations in the
+original Org files, and even to edit these files remotely.
+
+The information to be shown is normally collected from all agenda files,
+the files listed in the variable org-agenda-files. If a directory is part of this
+list, all files with the extension .org in this directory will be part of the list.
+#+begin_src emacs-lisp
+  (setq org-agenda-files '("~/doc/org"))
+#+end_src
+
+The purpose of the weekly/daily agenda is to act like a page of a paper agenda,
+showing all the tasks for the current week or day. The default number of days
+displayed in the agenda is set by the variable org-agenda-span. This variable
+can be set to any number of days you want to see by default in the agenda, or
+to a span name, such as day, week, month or year.
+#+begin_src emacs-lisp
+  (setq org-agenda-span 'day)
+#+end_src
+
+Before displaying items in an agenda view, Org mode visually prepares the items
+and sorts them. Each item occupies a single line. The line starts with a prefix
+that contains the category of the item and other important information.
+You can customize in which column tags will be displayed through org-agenda-tags-column.
+#+begin_src emacs-lisp
+  (setq org-agenda-tags-column -110)
+#+end_src
+
+Change block separator to '-'.
+#+begin_src emacs-lisp
+  (setq org-agenda-block-separator 45)
+#+end_src
+
+If the agenda is in single-day mode, or for the display of today, the timed entries
+are embedded in a time grid. The time grid can be turned on and off with the variable
+org-agenda-use-time-grid, and can be configured with org-agenda-time-grid.
+#+begin_src emacs-lisp
+(setq org-agenda-time-grid
+      (quote ((daily today remove-match)
+              (800 1000 1200 1400 1600 1800 2000 2200)
+              "......" "-----------------")))
+(setq org-agenda-current-time-string "now ―•―•―•―•―•―•―")
+#+end_src
+
+When making the TODO list don't show entries scheduled in the future.
+#+begin_src emacs-lisp
+  (setq org-agenda-tags-todo-honor-ignore-options t)
+  (setq org-agenda-todo-ignore-scheduled 'future)
+  (setq org-agenda-todo-ignore-deadlines 'future)
+#+end_src
+
+Custom agenda commands serve two purposes: to store and quickly access frequently used
+TODO and tags searches, and to create special composite agenda buffers. Custom agenda
+commands will be accessible through the dispatcher, just like the default commands.
+#+begin_src emacs-lisp
+  (setq org-agenda-custom-commands
+        '((" " "Agenda"
+           ((agenda "" nil)
+            (tags "REFILE"
+                  ((org-agenda-overriding-header "Tasks to Refile")
+                   (org-tags-match-list-sublevels nil)))
+            (tags-todo "-WAIT-CANC/!NEXT"
+                       ((org-agenda-overriding-header "Project Next Tasks")
+                        (org-agenda-skip-function 'bh/skip-projects-and-habits-and-single-tasks)))
+              (tags-todo "-REFILE-CANC/!-WAIT-HOLD"
+                       ((org-agenda-overriding-header "Standalone Tasks")
+                        (org-agenda-skip-function 'bh/skip-project-tasks)
+                        (org-agenda-sorting-strategy
+                         '(priority-down category-keep))))
+            (tags-todo "-CANC/!"
+                       ((org-agenda-overriding-header "Stuck Projects")
+                        (org-agenda-skip-function 'bh/skip-non-stuck-projects)
+                        (org-tags-match-list-sublevels 'indented)))
+            (tags-todo "-HOLD-CANC/!"
+                       ((org-agenda-overriding-header "Projects")
+                        (org-agenda-skip-function 'bh/skip-non-projects)
+                        (org-tags-match-list-sublevels 'indented)))
+            (tags-todo "-CANC+WAIT/!"
+                       ((org-agenda-overriding-header "Waiting Tasks")
+                        (org-agenda-skip-function 'bh/skip-non-tasks)
+                        (org-tags-match-list-sublevels nil)))
+            (tags-todo "-CANC+HOLD/!"
+                       ((org-agenda-overriding-header "Postponed Tasks")
+                        (org-agenda-skip-function 'bh/skip-non-tasks)
+                        (org-tags-match-list-sublevels nil)))
+            (tags "-REFILE/"
+                  ((org-agenda-overriding-header "Tasks to Archive")
+                   (org-agenda-skip-function 'bh/skip-non-archivable-tasks)
+                   (org-tags-match-list-sublevels nil)))
+            nil))))
+#+end_src
+
+Helper functions used by agenda view. From [[http://doc.norang.ca/org-mode.html][Org Mode - Organize Your Life In Plain Text!]].
+#+begin_src emacs-lisp
+    (defun bh/is-project-p ()
+      "Any task with a todo keyword subtask"
+      (save-restriction
+        (widen)
+        (let ((has-subtask)
+              (subtree-end (save-excursion (org-end-of-subtree t)))
+              (is-a-task (member (nth 2 (org-heading-components)) org-todo-keywords-1)))
+          (save-excursion
+            (forward-line 1)
+            (while (and (not has-subtask)
+                        (< (point) subtree-end)
+                        (re-search-forward "^\*+ " subtree-end t))
+              (when (member (org-get-todo-state) org-todo-keywords-1)
+                (setq has-subtask t))))
+          (and is-a-task has-subtask))))
+
+    (defun bh/is-project-subtree-p ()
+      "Any task with a todo keyword that is in a project subtree.
+    Callers of this function already widen the buffer view."
+      (let ((task (save-excursion (org-back-to-heading 'invisible-ok)
+                                  (point))))
+        (save-excursion
+          (bh/find-project-task)
+          (if (equal (point) task)
+              nil
+            t))))
+
+    (defun bh/is-task-p ()
+      "Any task with a todo keyword and no subtask"
+      (save-restriction
+        (widen)
+        (let ((has-subtask)
+              (subtree-end (save-excursion (org-end-of-subtree t)))
+              (is-a-task (member (nth 2 (org-heading-components)) org-todo-keywords-1)))
+          (save-excursion
+            (forward-line 1)
+            (while (and (not has-subtask)
+                        (< (point) subtree-end)
+                        (re-search-forward "^\*+ " subtree-end t))
+              (when (member (org-get-todo-state) org-todo-keywords-1)
+                (setq has-subtask t))))
+          (and is-a-task (not has-subtask)))))
+
+    (defun bh/is-subproject-p ()
+      "Any task which is a subtask of another project"
+      (let ((is-subproject)
+            (is-a-task (member (nth 2 (org-heading-components)) org-todo-keywords-1)))
+        (save-excursion
+          (while (and (not is-subproject) (org-up-heading-safe))
+            (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
+              (setq is-subproject t))))
+        (and is-a-task is-subproject)))
+
+    (defun bh/list-sublevels-for-projects-indented ()
+      "Set org-tags-match-list-sublevels so when restricted to a subtree we list all subtasks.
+      This is normally used by skipping functions where this variable is already local to the agenda."
+      (if (marker-buffer org-agenda-restrict-begin)
+          (setq org-tags-match-list-sublevels 'indented)
+        (setq org-tags-match-list-sublevels nil))
+      nil)
+
+    (defun bh/list-sublevels-for-projects ()
+      "Set org-tags-match-list-sublevels so when restricted to a subtree we list all subtasks.
+      This is normally used by skipping functions where this variable is already local to the agenda."
+      (if (marker-buffer org-agenda-restrict-begin)
+          (setq org-tags-match-list-sublevels t)
+        (setq org-tags-match-list-sublevels nil))
+      nil)
+
+    (defun bh/skip-stuck-projects ()
+      "Skip trees that are not stuck projects"
+      (save-restriction
+        (widen)
+        (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+          (if (bh/is-project-p)
+              (let* ((subtree-end (save-excursion (org-end-of-subtree t)))
+                     (has-next ))
+                (save-excursion
+                  (forward-line 1)
+                  (while (and (not has-next) (< (point) subtree-end) (re-search-forward "^\\*+ NEXT " subtree-end t))
+                    (unless (member "WAIT" (org-get-tags-at))
+                      (setq has-next t))))
+                (if has-next
+                    nil
+                  next-headline)) ; a stuck project, has subtasks but no next task
+            nil))))
+
+    (defun bh/skip-non-stuck-projects ()
+      "Skip trees that are not stuck projects"
+      ;; (bh/list-sublevels-for-projects-indented)
+      (save-restriction
+        (widen)
+        (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+          (if (bh/is-project-p)
+              (let* ((subtree-end (save-excursion (org-end-of-subtree t)))
+                     (has-next ))
+                (save-excursion
+                  (forward-line 1)
+                  (while (and (not has-next) (< (point) subtree-end) (re-search-forward "^\\*+ NEXT " subtree-end t))
+                    (unless (member "WAIT" (org-get-tags-at))
+                      (setq has-next t))))
+                (if has-next
+                    next-headline
+                  nil)) ; a stuck project, has subtasks but no next task
+            next-headline))))
+
+    (defun bh/skip-non-projects ()
+      "Skip trees that are not projects"
+      ;; (bh/list-sublevels-for-projects-indented)
+      (if (save-excursion (bh/skip-non-stuck-projects))
+          (save-restriction
+            (widen)
+            (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+              (cond
+               ((bh/is-project-p)
+                nil)
+               ((and (bh/is-project-subtree-p) (not (bh/is-task-p)))
+                nil)
+               (t
+                subtree-end))))
+        (save-excursion (org-end-of-subtree t))))
+
+    (defun bh/skip-non-tasks ()
+      "Show non-project tasks.
+    Skip project and sub-project tasks, habits, and project related tasks."
+      (save-restriction
+        (widen)
+        (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+          (cond
+           ((bh/is-task-p)
+            nil)
+           (t
+            next-headline)))))
+
+    (defun bh/skip-project-trees-and-habits ()
+      "Skip trees that are projects"
+      (save-restriction
+        (widen)
+        (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+          (cond
+           ((bh/is-project-p)
+            subtree-end)
+           ((org-is-habit-p)
+            subtree-end)
+           (t
+            nil)))))
+
+    (defun bh/skip-projects-and-habits-and-single-tasks ()
+      "Skip trees that are projects, tasks that are habits, single non-project tasks"
+      (save-restriction
+        (widen)
+        (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+          (cond
+           ((org-is-habit-p)
+            next-headline)
+           ((member "WAIT" (org-get-tags-at))
+            next-headline)
+           ((bh/is-project-p)
+            next-headline)
+           ((and (bh/is-task-p) (not (bh/is-project-subtree-p)))
+            next-headline)
+           (t
+            nil)))))
+
+    (defun bh/skip-project-tasks-maybe ()
+      "Show tasks related to the current restriction.
+    When restricted to a project, skip project and sub project tasks, habits, NEXT tasks, and loose tasks.
+    When not restricted, skip project and sub-project tasks, habits, and project related tasks."
+      (save-restriction
+        (widen)
+        (let* ((subtree-end (save-excursion (org-end-of-subtree t)))
+               (next-headline (save-excursion (or (outline-next-heading) (point-max))))
+               (limit-to-project (marker-buffer org-agenda-restrict-begin)))
+          (cond
+           ((bh/is-project-p)
+            next-headline)
+           ((org-is-habit-p)
+            subtree-end)
+           ((and (not limit-to-project)
+                 (bh/is-project-subtree-p))
+            subtree-end)
+           ((and limit-to-project
+                 (bh/is-project-subtree-p)
+                 (member (org-get-todo-state) (list "NEXT")))
+            subtree-end)
+           (t
+            nil)))))
+
+    (defun bh/skip-project-tasks ()
+      "Show non-project tasks.
+    Skip project and sub-project tasks, habits, and project related tasks."
+      (save-restriction
+        (widen)
+        (let* ((subtree-end (save-excursion (org-end-of-subtree t))))
+          (cond
+           ((bh/is-project-p)
+            subtree-end)
+           ((org-is-habit-p)
+            subtree-end)
+           ((bh/is-project-subtree-p)
+            subtree-end)
+           (t
+            nil)))))
+
+    (defun bh/skip-non-project-tasks ()
+      "Show project tasks.
+    Skip project and sub-project tasks, habits, and loose non-project tasks."
+      (save-restriction
+        (widen)
+        (let* ((subtree-end (save-excursion (org-end-of-subtree t)))
+               (next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+          (cond
+           ((bh/is-project-p)
+            next-headline)
+           ((org-is-habit-p)
+            subtree-end)
+           ((and (bh/is-project-subtree-p)
+                 (member (org-get-todo-state) (list "NEXT")))
+            subtree-end)
+           ((not (bh/is-project-subtree-p))
+            subtree-end)
+           (t
+            nil)))))
+
+    (defun bh/skip-projects-and-habits ()
+      "Skip trees that are projects and tasks that are habits"
+      (save-restriction
+        (widen)
+        (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+          (cond
+           ((bh/is-project-p)
+            subtree-end)
+           ((org-is-habit-p)
+            subtree-end)
+           (t
+            nil)))))
+
+    (defun bh/skip-non-subprojects ()
+      "Skip trees that are not projects"
+      (let ((next-headline (save-excursion (outline-next-heading))))
+        (if (bh/is-subproject-p)
+            nil
+          next-headline)))
+
+  (defun bh/find-project-task ()
+    "Move point to the parent (project) task if any"
+    (save-restriction
+      (widen)
+      (let ((parent-task (save-excursion (org-back-to-heading 'invisible-ok) (point))))
+        (while (org-up-heading-safe)
+          (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
+            (setq parent-task (point))))
+        (goto-char parent-task)
+        parent-task)))
+
+  (defun bh/skip-non-archivable-tasks ()
+    "Skip trees that are not available for archiving"
+    (save-restriction
+      (widen)
+      ;; Consider only tasks with done todo headings as archivable candidates
+      (let ((next-headline (save-excursion (or (outline-next-heading) (point-max))))
+            (subtree-end (save-excursion (org-end-of-subtree t))))
+        (if (member (org-get-todo-state) org-todo-keywords-1)
+            (if (member (org-get-todo-state) org-done-keywords)
+                (let* ((daynr (string-to-int (format-time-string "%d" (current-time))))
+                       (a-month-ago (* 60 60 24 (+ daynr 1)))
+                       (last-month (format-time-string "%Y-%m-" (time-subtract (current-time) (seconds-to-time a-month-ago))))
+                       (this-month (format-time-string "%Y-%m-" (current-time)))
+                       (subtree-is-current (save-excursion
+                                             (forward-line 1)
+                                             (and (< (point) subtree-end)
+                                                  (re-search-forward (concat last-month "\\|" this-month) subtree-end t)))))
+                  (if subtree-is-current
+                      subtree-end ; Has a date in this month or last month, skip it
+                    nil))  ; available to archive
+              (or subtree-end (point-max)))
+          next-headline))))
+#+end_src
+
+** Coding
+*** Basic settings
+
+**** No tabs
+By default, Emacs inserts tabs in place of multiple spaces when it formats a region.
+The following turns off Indent Tabs mode:
+#+begin_src emacs-lisp
+(setq-default indent-tabs-mode nil)
+#+end_src
+
+**** Which Function mode
+Which Function mode is a global minor mode which displays the current function
+name in the mode line, updating it as you move around in a buffer. By default,
+it takes effect in all major modes major modes that know how to support it
+(i.e., all the major modes that support Imenu).
+#+begin_src emacs-lisp
+(require 'which-func)
+(which-func-mode t)
+#+end_src
+
+*** Markdown
+markdown-mode is a major mode for GNU Emacs which provides syntax highlighting and
+supporting commands for editing Markdown files.
+
+**** GithHub flavor
+A GitHub Flavored Markdown (GFM) mode, gfm-mode, is also available. The GitHub
+implementation of differs slightly from standard Markdown. The most important
+differences are that newlines are significant, triggering hard line breaks, and
+that underscores inside of words (e.g., variable names) need not be escaped.
+
+For a more complete GitHub-flavored markdown experience, added README.md to
+auto-mode-alist:
+#+begin_src emacs-lisp
+(add-to-list 'auto-mode-alist '("README\\.md\\'" . gfm-mode))
+#+end_src
+
+*** Haskell
+Haskell is an advanced purely-functional programming language. An open-source
+product of more than twenty years of cutting-edge research, it allows rapid
+development of robust, concise, correct software. With strong support for integration
+with other languages, built-in concurrency and parallelism, debuggers, profilers,
+rich libraries and an active community, Haskell makes it easier to produce flexible,
+maintainable, high-quality software.
+
+**** Haskell mode
+Haskell Mode is a major mode providing a convenient environment for editing Haskell
+programs.
+
+Intelligent semi-automatic indentation for Haskell’s layout rule. The basic idea
+is to have TAB cycle through possibilities indentation points based on some clever
+heuristics. Improved with rebinds of RET and DEL, so that indentations can be set
+and deleted as if they were real tabs.
+#+begin_src emacs-lisp
+(add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+#+end_src
+
+By inserting the key bindings for C-, and C-. you can interactively de/indent
+either the following nested block or, if a region is active while in Transient Mark
+Mode, de/indent the active region. By using a numeric prefix argument you can modify
+the shift-amount; for instance, C-u C-, increases indentation by 4 characters at once.
+#+begin_src emacs-lisp
+(eval-after-load "haskell-mode"
+  '(progn
+     (define-key haskell-mode-map (kbd "C-,") 'haskell-move-nested-left)
+     (define-key haskell-mode-map (kbd "C-.") 'haskell-move-nested-right)))
+#+end_src
+
+haskell-decl-scan-mode is a minor mode which performs declaration scanning and
+provides M-x imenu support. For non-literate and TeX-style literate scripts, the
+common convention that top-level declarations start at the first column is assumed.
+For Bird-style literate scripts, the common convention that top-level declarations
+start at the third column, ie. after ‘> ’, is assumed. When haskell-decl-scan-mode
+is active, the standard Emacs top-level definition movement commands are enabled
+to operate on Haskell declarations:
++ C-M-a: Move to beginning of current or preceding declaration
++ C-M-e: Move to end of current or following declaration
++ C-M-h: Select whole current or following declaration
+Moreover, if enabled via the option haskell-decl-scan-add-to-menubar, a menu item
+"Declarations" is added to the menu bar listing the scanned declarations and
+allowing to jump to declarations in the source buffer.
+#+begin_src emacs-lisp
+(add-hook 'haskell-mode-hook 'turn-on-haskell-decl-scan)
+#+end_src
+
+haskell-decl-scan-mode enables the use of features that build upon imenu support such
+as the global “Which Function” minor mode. In order to enable which-function-mode
+for Haskell buffers you need to add the following to your Emacs initialization:
+#+begin_src emacs-lisp
+(eval-after-load "which-func"
+  '(add-to-list 'which-func-modes 'haskell-mode))
+#+end_src
+
+Haskell mode comes equipped with a specialized Compilation mode tailored to GHC’s
+compiler messages with optional support for Cabal projects.
+#+begin_src emacs-lisp
+(eval-after-load "haskell-mode"
+    '(define-key haskell-mode-map (kbd "C-c C-c") 'haskell-compile))
+(eval-after-load "haskell-cabal"
+    '(define-key haskell-cabal-mode-map (kbd "C-c C-c") 'haskell-compile))
+#+end_src
+
+An alternative mode providing a REPL (read–eval–print loop) via GHCi sessions is
+called haskell-interactive-mode, which effectively replaces inferior-haskell-mode,
+but comes with a different set of features. In order to use haskell-interactive-mode
+instead of the default inferior-haskell-mode, you need to replace some of the
+default keybindings in the haskell-mode-map keymap with the respective
+haskell-interactive-mode counterparts:
+#+begin_src emacs-lisp
+(eval-after-load "haskell-mode"
+  '(progn
+    (define-key haskell-mode-map (kbd "C-x C-d") nil)
+    (define-key haskell-mode-map (kbd "C-c C-z") 'haskell-interactive-switch)
+    (define-key haskell-mode-map (kbd "C-c C-l") 'haskell-process-load-file)
+    (define-key haskell-mode-map (kbd "C-c C-b") 'haskell-interactive-switch)
+    (define-key haskell-mode-map (kbd "C-c C-t") 'haskell-process-do-type)
+    (define-key haskell-mode-map (kbd "C-c C-i") 'haskell-process-do-info)
+    (define-key haskell-mode-map (kbd "C-c M-.") nil)
+    (define-key haskell-mode-map (kbd "C-c C-d") nil)))
+#+end_src
