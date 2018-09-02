@@ -135,7 +135,7 @@ Organize backup ...
 
 ... in a specific directory
 #+begin_src emacs-lisp
-(setq backup-directory-alist '(("." . "~/.emacs24.saves")))
+(setq backup-directory-alist '(("." . "~/.emacs26.saves")))
 #+end_src
 
 ... deleting excess backup versions

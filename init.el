@@ -3,7 +3,7 @@
 ;; This file loads Org-mode and then loads the rest of our Emacs initialization
 ;; from Emacs lisp embedded in literate Org-mode files.
 
-(setq user-emacs-directory (file-name-as-directory "~/.emacs24.d"))
+(setq user-emacs-directory (file-name-as-directory "~/.emacs26.d"))
 
 (add-to-list 'load-path (expand-file-name "src/org-mode/lisp" user-emacs-directory))
 (add-to-list 'load-path (expand-file-name "src/org-mode/contrib/lisp" user-emacs-directory))
