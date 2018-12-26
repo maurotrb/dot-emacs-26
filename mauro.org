@@ -25,6 +25,10 @@
   (el-get-bundle ledger-mode)
   (el-get-bundle markdown-mode)
   (el-get-bundle dired+)
+  (el-get-bundle yaml-mode)
+  (el-get-bundle! docker-compose-mode
+  :type github :pkgname "meqif/docker-compose-mode"
+  :description "Major mode for editing docker-compose files")
 #+end_src
 
 ** General
@@ -183,7 +187,7 @@ No confirmation if a file or buffer does not exist when you use C-x C-f or C-x b
 
 Input Mono as default font.
 #+begin_src emacs-lisp
-(set-default-font "Input Mono Compressed Light-9")
+(set-default-font "Input Mono Compressed Light-14")
 #+end_src
 
 No startup messages.
@@ -762,7 +766,7 @@ Helper functions used by agenda view. From [[http://doc.norang.ca/org-mode.html]
             (subtree-end (save-excursion (org-end-of-subtree t))))
         (if (member (org-get-todo-state) org-todo-keywords-1)
             (if (member (org-get-todo-state) org-done-keywords)
-                (let* ((daynr (string-to-int (format-time-string "%d" (current-time))))
+                (let* ((daynr (string-to-number (format-time-string "%d" (current-time))))
                        (a-month-ago (* 60 60 24 (+ daynr 1)))
                        (last-month (format-time-string "%Y-%m-" (time-subtract (current-time) (seconds-to-time a-month-ago))))
                        (this-month (format-time-string "%Y-%m-" (current-time)))
@@ -865,8 +869,8 @@ haskell-decl-scan-mode enables the use of features that build upon imenu support
 as the global “Which Function” minor mode. In order to enable which-function-mode
 for Haskell buffers you need to add the following to your Emacs initialization:
 #+begin_src emacs-lisp
-(eval-after-load "which-func"
-  '(add-to-list 'which-func-modes 'haskell-mode))
+;;(eval-after-load "which-func"
+;;  '(add-to-list 'which-func-modes 'haskell-mode))
 #+end_src
 
 Haskell mode comes equipped with a specialized Compilation mode tailored to GHC’s
