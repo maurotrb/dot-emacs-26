@@ -26,6 +26,7 @@
   (el-get-bundle markdown-mode)
   (el-get-bundle dired+)
   (el-get-bundle yaml-mode)
+  (el-get-bundle htmlize)
   (el-get-bundle! docker-compose-mode
   :type github :pkgname "meqif/docker-compose-mode"
   :description "Major mode for editing docker-compose files")
